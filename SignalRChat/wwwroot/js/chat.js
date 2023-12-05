@@ -1,0 +1,110 @@
+﻿const conexion = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+
+// Recibimos el mensaje del hub
+conexion.on("GetMessage", (message) => {
+    console.log(message)
+    const li = document.createElement("li");
+    li.textContent = message.user + " - " + message.text;
+    document.getElementById("lstMensajes").appendChild(li);
+});
+
+
+// Recibir los usuarios conectados
+conexion.on("GetUsers", (users) => {
+    console.log(users)
+    document.getElementById("lstUsuarios").innerHTML = "";
+    document.getElementById("lstUsuariosTotales").innerHTML = "";
+    const sala = document.getElementById("sala").value;
+    console.log(sala)
+    users.forEach(x => {
+        const li = document.createElement("li");
+        li.textContent = x.user;
+        const li2 = document.createElement("li");
+        li2.textContent = x.user;
+        document.getElementById("lstUsuariosTotales").appendChild(li);
+        if (sala == x.room) {
+            document.getElementById("lstUsuarios").appendChild(li2);
+        }
+    })
+});
+
+// Evento de conexión
+//conexion.start().then(() => {
+//    const li = document.createElement("li");
+//    li.textContent = "Bienvenido al chat";
+//    document.getElementById("lstMensajes").appendChild(li);
+//}).catch((error) => {
+//    console.error(error);
+//});
+
+document.getElementById("txtUsuario").addEventListener("input", (event) => {
+    document.getElementById("btnConectar").disabled = event.target.value === "";
+});
+
+document.getElementById("btnConectar").addEventListener("click", (event) => {
+    if (conexion.state === signalR.HubConnectionState.Disconnected) {
+        const sala = document.getElementById("sala").value;
+
+        if (sala == "Elige sala") {
+            alert("Elige una sala para conectarte");
+        } else {
+            conexion.start().then(() => {
+                const li = document.createElement("li");
+                li.textContent = "Conectado con el servidor en tiempo real";
+                document.getElementById("lstMensajes").appendChild(li);
+                document.getElementById("btnConectar").textContent = "Desconectar";
+                document.getElementById("txtUsuario").disabled = true;
+                document.getElementById("txtMensaje").disabled = false;
+                document.getElementById("btnEnviar").disabled = false;
+                document.getElementById("sala").disabled = true;
+
+                const usuario = document.getElementById("txtUsuario").value;
+
+                const message = {
+                    user: usuario,
+                    room: sala,
+                    text: ""
+                }
+                conexion.invoke("SendMessage", message).catch(function (error) {
+                    console.error(error);
+                });
+            }).catch(function (error) {
+                console.error(error);
+            });
+        }
+    }
+    else if (conexion.state === signalR.HubConnectionState.Connected) {
+        conexion.stop();
+
+        const li = document.createElement("li");
+        li.textContent = "Has salido del chat";
+        document.getElementById("lstMensajes").appendChild(li);
+        document.getElementById("btnConectar").textContent = "Conectar";
+        document.getElementById("txtUsuario").disabled = false;
+        document.getElementById("txtMensaje").disabled = true;
+        document.getElementById("btnEnviar").disabled = true;
+        document.getElementById("lstUsuarios").innerHTML = "";
+        document.getElementById("lstMensajes").innerHTML = "";
+        document.getElementById("sala").disabled = false;
+    }
+});
+
+
+document.getElementById("btnEnviar").addEventListener("click", (event) => {
+    const usuario = document.getElementById("txtUsuario").value;
+    const texto = document.getElementById("txtMensaje").value;
+    const sala = document.getElementById("sala").value;
+
+    const data = {
+        user: usuario,
+        room: sala,
+        text: texto
+    }
+
+    // invoke nos va a comunicar con el hub y el evento para pasarle el mensaje
+    conexion.invoke("SendMessage", data).catch((error) => {
+        console.error(error);
+    });
+    document.getElementById("txtMensaje").value = "";
+    event.preventDefault(); // Para evitar el submit
+})

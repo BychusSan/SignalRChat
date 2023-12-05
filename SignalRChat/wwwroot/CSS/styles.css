@@ -1,0 +1,34 @@
+﻿/* Estilo para fijar el botón de enviar en la parte inferior */
+.fixed-send-button {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+}
+
+/* Estilo para centrar los mensajes */
+.messages-container {
+    max-height: 370px; /* Altura máxima para mostrar el scroll cuando los mensajes sean más largos */
+    overflow-y: auto; /* Agrega un scroll vertical cuando los mensajes excedan la altura máxima */
+    text-align: center; /* Centra los mensajes */
+}
+
+/* Estilo para fijar el botón de enviar en la parte central de la página */
+.fixed-send-button-container {
+    position: fixed;
+    bottom: 45%; /* Ajusta este valor para mover el botón hacia arriba o abajo */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    width: 100%;
+}
+
+.fixed-connect-button-container {
+    position: fixed;
+    bottom: 90%; /* Ajusta este valor para mover el botón hacia arriba o abajo */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    width: 100%;
+}
